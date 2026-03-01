@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шифры Виженера и Плейфера | Русский и английский</title>
+    <!-- Подключаем внешний CSS файл -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Шифры Виженера и Плейфера</h1>
+            <p>Виженер (русский) | Плейфер (английский, 4 матрицы)</p>
+        </div>
+
+        <div class="content">
+            <div class="algorithm-selector">
+                <button class="algorithm-btn active" onclick="window.app.setAlgorithm('vigenere')" id="btnVigenere">📜 Виженер (русский)</button>
+                <button class="algorithm-btn" onclick="window.app.setAlgorithm('playfair')" id="btnPlayfair">🎲 Плейфер (английский, 4 матрицы)</button>
+            </div>
+
+            <div class="language-indicator" id="languageIndicator">
+                <span class="language-badge" id="currentLanguage">Русский язык</span>
+            </div>
+
+            <div class="input-group">
+                <label>📝 Входной текст</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">✏️</span>
+                    <textarea id="inputText" placeholder="Введите текст для шифрования или дешифрования...">ПРИВЕТМИР</textarea>
+                </div>
+                <div class="file-input-container">
+                    <button class="file-btn" onclick="document.getElementById('fileInput').click()">
+                        <span>📂</span> Загрузить из файла
+                    </button>
+                    <input type="file" id="fileInput" accept=".txt,.text" style="display: none;">
+                    <span class="file-name" id="fileName">Файл не выбран</span>
+                </div>
+            </div>
+
+            <!-- Поля для Виженера (1 ключ, русский) -->
+            <div id="vigenereKeys" class="input-group">
+                <label>🔑 Ключ шифрования (Виженер, русский)</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🗝️</span>
+                    <input type="text" id="vigenereKey" class="key-input" placeholder="Введите ключевое слово на русском..." value="КЛЮЧ">
+                </div>
+            </div>
+
+            <!-- Поля для Плейфера (4 ключа, английский) -->
+            <div id="playfairKeys" class="keys-container" style="display: none;">
+                <div class="key-field">
+                    <label>🔑 Ключ 1 (Матрица 1, английский)</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">1️⃣</span>
+                        <input type="text" id="playfairKey1" class="key-input" placeholder="Английский ключ для M1..." value="CRYPTO">
+                    </div>
+                </div>
+                <div class="key-field">
+                    <label>🔑 Ключ 2 (Матрица 2, английский)</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">2️⃣</span>
+                        <input type="text" id="playfairKey2" class="key-input" placeholder="Английский ключ для M2..." value="GRAPHY">
+                    </div>
+                </div>
+                <div class="key-field">
+                    <label>🔑 Ключ 3 (Матрица 3, английский)</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">3️⃣</span>
+                        <input type="text" id="playfairKey3" class="key-input" placeholder="Английский ключ для M3..." value="SECURE">
+                    </div>
+                </div>
+                <div class="key-field">
+                    <label>🔑 Ключ 4 (Матрица 4, английский)</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">4️⃣</span>
+                        <input type="text" id="playfairKey4" class="key-input" placeholder="Английский ключ для M4..." value="MESSAGE">
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-encrypt" onclick="window.app.encrypt()">
+                    <span>🔒</span> Зашифровать
+                </button>
+                <button class="btn btn-decrypt" onclick="window.app.decrypt()">
+                    <span>🔓</span> Расшифровать
+                </button>
+                <button class="btn btn-clear" onclick="window.app.clearAll()">
+                    <span>🗑️</span> Очистить
+                </button>
+            </div>
+
+            <div class="input-group">
+                <label>📋 Результат</label>
+                <div class="input-wrapper result-wrapper">
+                    <span class="input-icon">📄</span>
+                    <textarea id="outputText" placeholder="Здесь появится результат..." readonly></textarea>
+                    <button class="copy-btn" onclick="window.app.copyToClipboard()">📋 Копировать</button>
+                </div>
+                <div class="file-output-container">
+                    <button class="file-btn save-btn" onclick="window.app.saveToFile()">
+                        <span>💾</span> Сохранить в файл
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-label">Длина текста</div>
+                    <div class="stat-value" id="textLength">0 <span class="stat-unit">символов</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Количество ключей</div>
+                    <div class="stat-value" id="keyCount">1 <span class="stat-unit">ключ</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Обработано букв</div>
+                    <div class="stat-value" id="lettersOnly">0 <span class="stat-unit">букв</span></div>
+                </div>
+            </div>
+
+            <!-- Секция для таблицы Виженера -->
+            <div id="vigenereTableSection" class="vigenere-table-section">
+                <div class="section-header" onclick="window.app.toggleVigenereTable()">
+                    <h3>📊 Таблица Виженера</h3>
+                    <span class="toggle-icon" id="vigenereTableToggle">▼</span>
+                </div>
+                <div id="vigenereTableContainer" class="vigenere-table-container">
+                    <div class="table-wrapper">
+                        <!-- ИСПРАВЛЕНО: Добавлен элемент таблицы -->
+                        <table id="vigenereTable" class="vigenere-table">
+                            <!-- Таблица будет заполнена динамически из JavaScript -->
+                        </table>
+                    </div>
+                    <div class="table-info">
+                        <p><strong>Как читать таблицу:</strong></p>
+                        <ul>
+                            <li><span class="highlight">Верхняя строка</span> - символы исходного текста</li>
+                            <li><span class="highlight">Левый столбец</span> - символы ключа</li>
+                            <li>На пересечении - символ шифротекста</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Визуализация матриц для Плейфера -->
+            <div id="matrixVisualization" class="matrix-visualization" style="display: none;">
+                <div class="matrix">
+                    <h4>Матрица 1 <span class="matrix-key" id="matrixKey1"></span></h4>
+                    <div id="matrix1" class="matrix-grid"></div>
+                </div>
+                <div class="matrix">
+                    <h4>Матрица 2 <span class="matrix-key" id="matrixKey2"></span></h4>
+                    <div id="matrix2" class="matrix-grid"></div>
+                </div>
+                <div class="matrix">
+                    <h4>Матрица 3 <span class="matrix-key" id="matrixKey3"></span></h4>
+                    <div id="matrix3" class="matrix-grid"></div>
+                </div>
+                <div class="matrix">
+                    <h4>Матрица 4 <span class="matrix-key" id="matrixKey4"></span></h4>
+                    <div id="matrix4" class="matrix-grid"></div>
+                </div>
+            </div>
+
+            <!-- Секция с примером шифрования -->
+            <div id="encryptionExample" class="encryption-example" style="display: none;">
+                <h4>🔍 Пример шифрования</h4>
+                <div class="example-content" id="exampleContent"></div>
+            </div>
+
+            <div class="features">
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    Виженер: русский алфавит (33 буквы)
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    Плейфер: английский алфавит (I=J)
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    4 матрицы для Плейфера
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    Загрузка/сохранение файлов
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <span>✅</span>
+        <span id="toastMessage">Скопировано!</span>
+    </div>
+
+    <!-- Подключаем внешние JS модули -->
+    <script type="module" src="vigenere.js"></script>
+    <script type="module" src="playfair.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
